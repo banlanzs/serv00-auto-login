@@ -8,6 +8,7 @@ addEventListener('scheduled', event => {
 
 async function handleRequest(request) {
   const url = new URL(request.url)
+
   
   if (url.pathname === '/login' && request.method === 'POST') {
     const formData = await request.formData()
@@ -48,7 +49,11 @@ async function handleRequest(request) {
     return new Response(JSON.stringify({ authenticated: isAuthenticated(request) }), {
       headers: { 'Content-Type': 'application/json' }
     })
-  } else {
+  } 
+  else if (url.pathname === '/exit' && request.method === 'GET') {
+    return Response.redirect(previousPageURL, 302);
+  }
+  else {
     // 显示登录页面或结果页面的 HTML
     return new Response(getHtmlContent(), {
       headers: { 'Content-Type': 'text/html' },
@@ -136,9 +141,11 @@ function getHtmlContent() {
       <div id="loginForm">
         <input type="password" id="password" placeholder="Enter password">
         <button onclick="login()">Login</button>
+        <button onclick="exit()">Exit</button>
       </div>
       <div id="dashboard">
         <button onclick="runScript()">Run Script</button>
+        <button onclick="exitScript()">Exit Script</button>
         <div id="status"></div>
         <table id="resultsTable">
           <thead>
@@ -156,7 +163,6 @@ function getHtmlContent() {
     </div>
     <script>
       let password = '';
-
       function showLoginForm() {
         document.getElementById('loginForm').style.display = 'block';
         document.getElementById('dashboard').style.display = 'none';
@@ -254,6 +260,19 @@ function getHtmlContent() {
         });
       }
 
+      function exitScript() {
+        const statusDiv = document.getElementById('status');
+        statusDiv.textContent = 'Exiting script...';
+        // 清理或退出逻辑
+        showLoginForm();
+      }
+      function exit() {
+        // 这里可以设置你希望返回的上一个页面的 URL
+        const previousPageURL = 'https://your-previous-page-url.com';
+        
+        window.location.href = previousPageURL;
+      }
+      
       // 页面加载时检查认证状态
       document.addEventListener('DOMContentLoaded', checkAuth);
     </script>
