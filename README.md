@@ -21,7 +21,7 @@ https://linux.do/t/topic/181957
 
   
   
-  ![QQ20240827-131050](https://github.com/user-attachments/assets/98b21d36-bde1-48fc-b6ee-64544927760f)
+  ![QQ20240827-131138](https://github.com/user-attachments/assets/c6c3bb57-5ed4-4279-998f-6c8e1a9f00bb)
   ---------------------------------------------------------------------------------------------------------------------------
   
    
