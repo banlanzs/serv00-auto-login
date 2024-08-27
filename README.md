@@ -47,8 +47,10 @@ https://linux.do/t/topic/181957
 --------------------------------------
 ** 操作步骤：**
 --------------------------------------
+--------------------------------------
 1.在cloudflare创建worker
    代码使用上面的autologin-script
+--------------------------------------
 
 2.创建变量
   ACCOUNTS_JSON
@@ -91,9 +93,9 @@ https://linux.do/t/topic/181957
 -------------------------------------------------------------------
 cronCommands这部分是你想要添加的cron任务，可以是路径，也可以是程序运行的命令(一个引号内是完整的执行命令)
 -------------------------------------------------------------------
-
+--------------
 TELEGRAM_JSON
-
+--------------
   {
   "telegramBotToken": "YOUR_BOT_TOKEN",
   "telegramBotUserId": "YOUR_USER_ID"
@@ -101,9 +103,10 @@ TELEGRAM_JSON
 
 ![image](https://github.com/user-attachments/assets/a36ef2f9-531f-4208-a824-8acc738f4068)
 
-
+-----------
 3.添加Cron
   4-12h为宜
+-----------
   ![image](https://github.com/user-attachments/assets/5316749d-d4e1-44b4-afd6-4db4754c4789)
 
 
@@ -116,7 +119,9 @@ TELEGRAM_JSON
   ![image](https://github.com/user-attachments/assets/47edbf74-a418-4aa0-947b-ec1e2fe65716)
   ------------------------------------------------------------------------------------------
 
+  ---------------
   5.绑定自定义域名
+  ---------------
     ![image](https://github.com/user-attachments/assets/56cff8ba-bbe1-4a8e-8769-c2f5bfc03efb)
     -----------------------------------------------------------------------------------------
 
