@@ -272,6 +272,7 @@ async function handleScheduled(scheduledTime) {
   let failCount = 0;
   let successAccounts = [];
   let failAccounts = [];
+  let totalAccounts = accounts.length; // 统计总账号数
   /////////
   for (const account of accounts) {
     const result = await loginAccount(account);
@@ -294,6 +295,7 @@ async function handleScheduled(scheduledTime) {
   // 统计报告
   const reportMessage = `
   自动登录结果:
+  总账号数: ${totalAccounts}
   成功账号数: ${successCount}
   失败账号数: ${failCount}
   成功登录的账号: ${successAccounts.join(', ')}
