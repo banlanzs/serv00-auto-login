@@ -25,7 +25,14 @@ async function handleRequest(request) {
         headers: { 'Content-Type': 'application/json' }
       })
     }
-  } else if (url.pathname === '/run' && request.method === 'POST') {
+  } 
+  else if (url.pathname === '/exitScript' && request.method === 'POST') {
+    const response = new Response('', {
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    response.headers.set('Set-Cookie', `auth=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0`);
+  } 
+  else if (url.pathname === '/run' && request.method === 'POST') {
     if (!isAuthenticated(request)) {
       return new Response('Unauthorized', { status: 401 })
     }
@@ -50,13 +57,6 @@ async function handleRequest(request) {
       headers: { 'Content-Type': 'application/json' }
     })
   } 
-  else if (url.pathname === '/logout' && request.method === 'POST') {
-    const response = new Response('', {
-      headers: { 'Content-Type': 'text/plain' }
-    });
-    response.headers.set('Set-Cookie', `auth=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0`);
-    return response;
-  }
   else {
     // 显示登录页面或结果页面的 HTML
     return new Response(getHtmlContent(), {
@@ -64,6 +64,7 @@ async function handleRequest(request) {
     })
   }
 }
+
 
 function isAuthenticated(request) {
   const cookies = request.headers.get('Cookie')
@@ -264,14 +265,10 @@ function getHtmlContent() {
       }
 
       function exitScript() {
-        // const statusDiv = document.getElementById('status');
-        // statusDiv.textContent = 'Exiting script...';
-        // // 清理或退出逻辑
-        // showLoginForm();
-        // 这里可以设置你希望返回的上一个页面的 URL
+         // 这里可以设置你希望返回的上一个页面的 URL
         const previousPageURL = 'https://www.youtube.com';
-        
         window.location.href = previousPageURL;
+        
       }
       // 页面加载时检查认证状态
       document.addEventListener('DOMContentLoaded', checkAuth);
