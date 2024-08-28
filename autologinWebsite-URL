@@ -1,0 +1,229 @@
+const AUTH_PASSWORD = PWD; // 设置面板访问密码
+
+// 用于存储最近一次登录信息的变量
+let lastLoginTime = null;
+let lastLoginStatus = null;
+
+addEventListener('fetch', event => {
+  event.respondWith(handleRequest(event.request));
+});
+
+async function handleRequest(request) {
+  const url = new URL(request.url);
+
+  // 处理密码验证
+  if (url.pathname === '/login' && request.method === 'POST') {
+    const formData = await request.formData();
+    const inputPassword = formData.get('password');
+
+    // 验证密码
+    if (inputPassword === AUTH_PASSWORD) {
+      // 验证成功，设置Cookie，并重定向到主页面
+      return new Response(null, {
+        status: 302,
+        headers: {
+          'Set-Cookie': `auth=1; path=/`,
+          'Location': '/panel',
+        }
+      });
+    } else {
+      return new Response('Invalid password', { status: 403 });
+    }
+  }
+
+  // 处理面板页面请求
+  if (url.pathname === '/panel') {
+    const cookies = request.headers.get('Cookie') || '';
+
+    // 检查是否通过了验证
+    if (!cookies.includes('auth=1')) {
+      return Response.redirect('/login-page', 302);
+    }
+
+    // 返回主面板页面
+    return new Response(getPanelPage(), {
+      headers: { 'Content-Type': 'text/html' },
+    });
+  }
+
+  // 处理运行脚本逻辑
+  if (url.pathname === '/run-script' && request.method === 'POST') {
+    const cookies = request.headers.get('Cookie') || '';
+    if (!cookies.includes('auth=1')) {
+      return new Response('Unauthorized', { status: 401 });
+    }
+
+    // 调用自动登录函数
+    const result = await autoLogin();
+
+    // 更新最近一次登录时间
+    lastLoginTime = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+    lastLoginStatus = result.includes('Login successful') ? '成功' : '失败';
+
+    return new Response(result, { status: 200 });
+  }
+
+  // 处理退出脚本逻辑
+  if (url.pathname === '/logout-script' && request.method === 'POST') {
+    // return new Response(null, {
+    //   status: 302,
+    //   headers: {
+    //     'Set-Cookie': 'auth=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/',
+    //      'Location': 'https://www.youtube.com',
+       
+    //   }
+    // });
+    const previousPageURL = 'https://www.youtube.com';
+        window.location.href = previousPageURL;
+  }
+
+  // 返回密码验证页面
+  return new Response(getLoginPage(), {
+    headers: { 'Content-Type': 'text/html' },
+  });
+}
+
+// 密码验证页面的HTML
+function getLoginPage() {
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Login</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 300px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        h2 { text-align: center; }
+        input[type="password"] { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h2>Login</h2>
+        <form id="loginForm">
+          <input type="password" id="password" placeholder="Enter password" required>
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+      <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const password = document.getElementById('password').value;
+          const formData = new FormData();
+          formData.append('password', password);
+
+          const response = await fetch('/login', {
+            method: 'POST',
+            body: formData
+          });
+
+          if (response.ok) {
+            window.location.href = '/panel';
+          } else {
+            alert('Invalid password');
+          }
+        });
+      </script>
+    </body>
+    </html>
+  `;
+}
+
+// 脚本操作页面的HTML
+function getPanelPage() {
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Script Runner</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 400px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        h2 { text-align: center; }
+        .info { margin-top: 20px; font-size: 14px; color: #555; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        input[type="password"] { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .button-group { display: flex; gap: 10px; margin-top: 10px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h2>Script Runner</h2>
+        <div class="button-group">
+          <button id="runScriptButton">Run Script</button>
+          <button id="logoutButton">Logout Script</button>
+        </div>
+        <div id="result" class="info"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>账号名</th>
+              <th>最近一次登录时间</th>
+              <th>登录是否成功</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${USERNAME}</td>
+              <td>${lastLoginTime || '暂无记录'}</td>
+              <td>${lastLoginStatus || '暂无记录'}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="info">
+          ${lastLoginTime ? `Last Login: ${lastLoginTime}` : 'No login attempts yet.'}
+        </div>
+      </div>
+      <script>
+        document.getElementById('runScriptButton').addEventListener('click', async () => {
+          const response = await fetch('/run-script', { method: 'POST' });
+          const result = await response.text();
+          document.getElementById('result').innerText = result;
+        });
+
+        document.getElementById('logoutButton').addEventListener('click', async () => {
+          await fetch('/logout-script', { method: 'POST' });
+          window.location.href = 'https://www.youtube.com';
+        });
+      </script>
+    </body>
+    </html>
+  `;
+}
+
+// 自动登录的逻辑
+async function autoLogin() {
+  const loginUrl = LOGIN_URL;
+  const username = USERNAME;
+  const password = PASSWORD;
+
+  const credentials = {
+    username: username,
+    password: password
+  };
+
+  try {
+    const loginResponse = await fetch(loginUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `username=${encodeURIComponent(credentials.username)}&password=${encodeURIComponent(credentials.password)}`,
+    });
+
+    if (!loginResponse.ok) {
+      return 'Login failed: ' + loginResponse.statusText;
+    }
+
+    return 'Login successful!';
+  } catch (error) {
+    return 'Error during login: ' + error;
+  }
+}
