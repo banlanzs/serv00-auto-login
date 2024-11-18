@@ -78,6 +78,7 @@ https://linux.do/t/topic/181957
 ![QQ截图20240827153902](https://github.com/user-attachments/assets/410ce697-d6c3-4b78-b7b4-9118438f18c8)
 -------------------------------------------------------------------------------------------------------
 
+```bash
 {
   "accounts": [
     {
@@ -110,16 +111,19 @@ https://linux.do/t/topic/181957
     }
   ]
 }
+```
 -------------------------------------------------------------------
 cronCommands这部分是你想要添加的cron任务，可以是路径，也可以是程序运行的命令(一个引号内是完整的执行命令)
 -------------------------------------------------------------------
 --------------
 TELEGRAM_JSON
 --------------
+ ```bash
   {
   "telegramBotToken": "YOUR_BOT_TOKEN",
   "telegramBotUserId": "YOUR_USER_ID"
 }
+```
 
 ![image](https://github.com/user-attachments/assets/a36ef2f9-531f-4208-a824-8acc738f4068)
 
